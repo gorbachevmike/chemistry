@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import {
   Box,
@@ -15,7 +15,6 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { Cups } from "./components/Cups";
 
 function randomNumber(min: number, max: number, fixed = 2) {
   return (Math.random() * (max - min) + min).toFixed(fixed);
@@ -54,17 +53,6 @@ function App() {
   const [x1, setX1] = useState(0);
 
   const [x2, setX2] = useState(0);
-
-  const [data, setData] = useState([
-    {
-      volume: 50,
-      num: 3,
-      mass: 3.02,
-      x: 473,
-      x_av: 456,
-    },
-    { volume: 50, num: 3, mass: 3.02, x: 473, x_av: 456 },
-  ]);
 
   useEffect(() => {
     const res = Math.round(((+dryW - +emptyW) * 1_000_000) / +volume);
