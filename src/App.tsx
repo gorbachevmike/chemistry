@@ -27,11 +27,20 @@ const headers = [
   { name: "m(п. сушки),г" },
   { name: "X, мг/дм3" },
   { name: "Xср, мг/дм3" },
+  { name: "Xср, мг/дм3" },
+  { name: 'Диапазон измерений' },
+  { name: "Фактическая повторяемость" },
+  { name: 'Предел повторяемости'},
+  { name: 'Погрешность'}
 ];
 
 const LIMIT_1 = 17;
 const LIMIT_2 = 8;
 const LIMIT_3 = 6;
+
+const TOCH_1 = 17;
+const TOCH_2 = 9;
+const TOCH_3 = 7;
 
 function App() {
   const [emptyW, setEmptyW] = useState("59.1093");
@@ -79,6 +88,29 @@ function App() {
   }, [emptyW, dryW, volume]);
 
   useEffect(() => {
+
+    let limit = 0;
+
+    if (result > 1 && result <= 50) {
+      limit = LIMIT_1;
+    } else if (result > 50 && result <= 5000) {
+      limit = LIMIT_2;
+    } else if (result > 5000 && result <= 35000) {
+      limit = LIMIT_3;
+    }
+
+    const randomRepeat = +randomNumber(1, limit);
+
+    const X1 = Math.round(result + randomRepeat);
+    const X2 = Math.round(result * 2 - X1);
+
+    setX1(X1);
+    setX2(X2);
+
+  }, [result])
+
+
+  useEffect(() => {
     const dM1 = (+x1 * +volume) / 1_000_000 + +emptyM1;
     const dM2 = (+x2 * +volume) / 1_000_000 + +emptyM2;
 
@@ -104,6 +136,23 @@ function App() {
 
     setCups(Cups);
   }, []);
+
+  const renderRound = () => {
+    if (result > 10 && result <= 1000) {
+      return result;
+    } else if (result > 1000 && result <= 10000) {
+      return Math.round(result / 10) * 10;
+    } else if (result > 10000) {
+      return Math.round(result / 100) * 100;
+    }
+  }
+
+  const renderFact = () => {
+
+    return Math.round(200*((Math.abs(x1-x2))/(x1+x2)));
+    // ( 200* ( (ABS(E3-E4) )/(E3+E4) ) )
+  }
+
 
   return (
     <>
@@ -143,6 +192,7 @@ function App() {
             onChange={(event) => {
               setEmptyW(event.target.value);
             }}
+            disabled={true}
           />
         </FormControl>
         <FormControl>
@@ -154,11 +204,14 @@ function App() {
             onChange={(event) => {
               setDryW(event.target.value);
             }}
+            disabled={true}
           />
         </FormControl>
         <FormControl>
           <FormLabel>Результат</FormLabel>
-          <Input size="sm" type="text" value={result} disabled={true} />
+          <Input size="sm" type="text" value={result} onChange={(event) => {
+            setResult(+event.target.value);
+          }} />
         </FormControl>
       </Flex>
 
@@ -192,12 +245,16 @@ function App() {
               <Td>{emptyM1}</Td>
               <Td>{dryM1}</Td>
               <Td>{x1}</Td>
-              <Td rowSpan={2}>{result}</Td>
+              <Td rowSpan={3}>{result}</Td>
+              <Td rowSpan={3}>{renderRound()}</Td>
+              <Td>от 1 до 50 включ</Td>
+              <Td rowSpan={3}>{renderFact()}</Td>
+              <Td>{LIMIT_1}</Td>
+              <Td>{(TOCH_1*0.01*result).toFixed(2)}</Td>
             </Tr>
             <Tr>
               <Td>{volume}</Td>
               <Td>
-                {" "}
                 <Select
                   size="sm"
                   placeholder="Выберите чашку"
@@ -215,6 +272,20 @@ function App() {
               <Td>{emptyM2}</Td>
               <Td>{dryM2}</Td>
               <Td>{x2}</Td>
+              <Td>св 50 до 5000 включ</Td>
+              <Td>{LIMIT_2}</Td>
+              <Td>{(TOCH_2*0.01*result).toFixed(2)}</Td>
+
+            </Tr>
+            <Tr>
+              <Td></Td>
+              <Td></Td>
+              <Td></Td>
+              <Td></Td>
+              <Td></Td>
+              <Td>св 5000 до 35000 вкл</Td>
+              <Td>{LIMIT_3}</Td>
+              <Td>{(TOCH_3*0.01*result).toFixed(2)}</Td>
             </Tr>
           </Tbody>
         </Table>
