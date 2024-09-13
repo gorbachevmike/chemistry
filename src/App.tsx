@@ -20,6 +20,50 @@ function randomNumber(min: number, max: number, fixed = 2) {
   return (Math.random() * (max - min) + min).toFixed(fixed);
 }
 
+function debug(msg: string) {
+  console.log('debug: ', msg);
+} 
+
+function generateX1andX2(limit: number, result: number) {
+  let isFine = true;
+
+  let x1 = 0;
+  let x2 = 0;
+
+  let fact = 0;
+
+  let iter = 0;
+
+  while(isFine) {
+    const randomRepeat = +randomNumber(1, limit);
+
+     x1 = Math.round(result + randomRepeat);
+     x2 = Math.round(result * 2 - x1);
+
+    fact = Math.round(200*((Math.abs(x1-x2))/(x1+x2))); 
+    isFine = !(fact <=limit);
+  
+    debug(`Iter = ${iter}`);
+
+    debug(`
+      isFine = ${fact <=limit} 
+      result = ${result} 
+      x1 = ${x1} 
+      x2 = ${x2} 
+      fact = ${fact}
+    `);
+    
+    iter++;
+
+    if (iter === 100) {
+      isFine = false;
+    }
+  }
+
+  return [x1, x2, fact];
+}
+
+
 const headers = [
   { name: "V(пробы), см3" },
   { name: "№ чашки" },
@@ -55,6 +99,7 @@ function App() {
   );
   const [emptyM1, setEmptyM1] = useState<any>();
   const [emptyM2, setEmptyM2] = useState<any>();
+  const [fact, setFact] = useState(0);
 
   const [dryM1, setDryM1] = useState(0);
   const [dryM2, setDryM2] = useState(0);
@@ -65,6 +110,7 @@ function App() {
 
   useEffect(() => {
     const res = Math.round(((+dryW - +emptyW) * 1_000_000) / +volume);
+
 
     let limit = 0;
 
@@ -88,7 +134,6 @@ function App() {
   }, [emptyW, dryW, volume]);
 
   useEffect(() => {
-
     let limit = 0;
 
     if (result > 1 && result <= 50) {
@@ -99,13 +144,11 @@ function App() {
       limit = LIMIT_3;
     }
 
-    const randomRepeat = +randomNumber(1, limit);
-
-    const X1 = Math.round(result + randomRepeat);
-    const X2 = Math.round(result * 2 - X1);
+    const [X1,X2, FACT] = generateX1andX2(limit, result);
 
     setX1(X1);
     setX2(X2);
+    setFact(FACT);
 
   }, [result])
 
@@ -147,12 +190,12 @@ function App() {
     }
   }
 
-  const renderFact = () => {
+  const onChangeCups = (value: string) => {
+    const randomMass = randomNumber(0, 0.0005, 4);
+    const emptyM1withMass = Number(value) + +randomMass;
 
-    return Math.round(200*((Math.abs(x1-x2))/(x1+x2)));
-    // ( 200* ( (ABS(E3-E4) )/(E3+E4) ) )
+    setEmptyM1(emptyM1withMass);
   }
-
 
   return (
     <>
@@ -220,7 +263,7 @@ function App() {
           <Thead>
             <Tr>
               {headers.map((head) => (
-                <Th key={head.name}>{head.name}</Th>
+                <Th key={head.name + Math.random()}>{head.name}</Th>
               ))}
             </Tr>
           </Thead>
@@ -232,7 +275,7 @@ function App() {
                   size="sm"
                   placeholder="Выберите чашку"
                   onChange={(event) => {
-                    setEmptyM1(event.target.value);
+                    onChangeCups(event.target.value);
                   }}
                 >
                   {cups.map((cup) => (
@@ -248,7 +291,7 @@ function App() {
               <Td rowSpan={3}>{result}</Td>
               <Td rowSpan={3}>{renderRound()}</Td>
               <Td>от 1 до 50 включ</Td>
-              <Td rowSpan={3}>{renderFact()}</Td>
+              <Td rowSpan={3}>{fact}</Td>
               <Td>{LIMIT_1}</Td>
               <Td>{(TOCH_1*0.01*result).toFixed(2)}</Td>
             </Tr>
