@@ -197,6 +197,13 @@ function App() {
     setEmptyM1(emptyM1withMass);
   }
 
+  const onChangeCups2 = (value: string) => {
+    const randomMass = randomNumber(0, 0.0005, 4);
+    const emptyM2withMass = Number(value) + +randomMass;
+
+    setEmptyM2(emptyM2withMass);
+  }
+
   return (
     <>
       <Box p={4}>
@@ -302,7 +309,7 @@ function App() {
                   size="sm"
                   placeholder="Выберите чашку"
                   onChange={(event) => {
-                    setEmptyM2(event.target.value);
+                    onChangeCups2(event.target.value);
                   }}
                 >
                   {cups.map((cup) => (
